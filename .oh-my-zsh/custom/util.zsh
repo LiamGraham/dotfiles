@@ -1,5 +1,6 @@
 export REPOS_DIR="$HOME/work"
 export GITHUB_USERNAME="liamgraham"
+export GITHUB_ORG_NAME=""
 
 cdiff() {
   if [[ $# -eq 2 ]]; then
@@ -46,7 +47,7 @@ cdroot() {
 clone-work() {
   if [ -n "$1" ]
   then
-    git clone git@github.com:MaxKelsen/$1.git
+    git clone git@github.com:$GITHUB_ORG_NAME/$1.git
   else
     echo "Usage: clone-work [repo-name]"
   fi
@@ -59,15 +60,6 @@ clone-me() {
   fi
 
   gh repo clone $GITHUB_USERNAME/$1
-}
-
-cdprop() {
-  target_name="core-api"
-  if [ $1 ]; then
-    target_name=$1
-  fi
-
-  cd $REPOS_DIR/mk-propel-$target_name
 }
 
 granch() {
@@ -84,5 +76,32 @@ granch() {
   fi
 
   git checkout $match
+}
+
+git-all-diffs() {
+  local unstaged_changes=$(git diff | diff-so-fancy)
+  local staged_changes=$(git diff --staged | diff-so-fancy)
+
+  if [[ -z "$unstaged_changes" && -z "$staged_changes" ]]; then
+    return
+  fi
+
+  echo -e "\e[1;33mUnstaged Changes:\e[0m"
+  if [[ ! -z "$unstaged_changes" ]]; then
+    echo "$unstaged_changes"
+  else
+    echo "No unstaged changes"
+  fi
+
+  echo -e "\n\e[1;33mStaged Changes:\e[0m"
+  if [[ ! -z "$staged_changes" ]]; then
+    echo "$staged_changes"
+  else
+    echo "No staged changes"
+  fi
+}
+
+gcloud-activate() {
+  gcloud config configurations activate $1 && gcloud auth login
 }
 
